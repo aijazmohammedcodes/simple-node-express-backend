@@ -1,0 +1,111 @@
+name: CI Pipeline with Security & Quality Scans
+
+on:
+  push:
+    branches: [ Dev, UAT ]
+  pull_request:
+    branches: [ Dev, UAT ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # 3. Cache npm dependencies
+      - name: Cache npm dependencies
+        uses: actions/cache@v4.2.4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 5. Run ESLint and save results (Code Quality Scanning)
+      - name: Run ESLint
+        run: |
+          npx eslint . --ext .js,.jsx,.ts,.tsx -f stylish > lint-report.txt || true
+
+      # 6. Upload ESLint results as artifact (Code Quality Scanning)
+      - name: Upload Lint Report
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: lint-report
+          path: lint-report.txt
+
+      # 7. CodeQL - Code Scanning
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          output: codeql-results.sarif
+
+      - name: Upload CodeQL Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-report
+          path: codeql-results.sarif
+
+      # 8. Dependency Scanning
+      - name: Run npm audit
+        run: npm audit --json > npm-audit-report.json
+
+      - name: Upload npm Audit Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: npm-audit-report.json
+
+      # 9. Secrets Detection with Gitleaks
+      - name: Install Gitleaks
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | bash
+          sudo mv gitleaks /usr/local/bin/
+
+      - name: Run Gitleaks
+        run: gitleaks detect --report-format json --report-path gitleaks-report.json || true
+
+      - name: Upload Gitleaks Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-report
+          path: gitleaks-report.json
+
+      # 10. Run tests and generate JUnit report
+      - name: Run tests
+        run: |
+          mkdir -p test-results
+          npm test -- --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results/results.xml
+
+      # 11. Publish Test Results
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: test-results
+          path: test-results/results.xml
+
+      # 12. Create build artifact for CD
+      - name: Create artifact for deployment
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: backend-app
+          path: |
+            .
+            !node_modules/
