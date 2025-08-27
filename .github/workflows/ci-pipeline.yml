@@ -80,11 +80,13 @@ jobs:
       # 9. Secrets Detection with Gitleaks
       - name: Install Gitleaks
         run: |
-          curl -sSfL https://raw.githubusercontent.com/gitleaks/gitleaks/master/install.sh | bash
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 \
+            -o gitleaks
+          chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/
 
       - name: Run Gitleaks
-        run: gitleaks detect --report-format json --report-path gitleaks-report.json || true
+        run: gitleaks detect --source . --report-path gitleaks-report.json --no-git
 
       - name: Upload Gitleaks Report
         uses: actions/upload-artifact@v4
