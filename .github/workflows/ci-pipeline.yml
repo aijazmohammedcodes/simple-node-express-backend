@@ -1,0 +1,13 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ Dev, UAT ]
+  pull_request:
+    branches: [ Dev, UAT ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Add steps from Marketplace UI after this line
