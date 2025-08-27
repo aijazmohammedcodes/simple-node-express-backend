@@ -7,7 +7,63 @@ on:
     branches: [ Dev, UAT ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
+    
     steps:
-      # Add steps from Marketplace UI after this line
+      # 1. Checkout code
+      - name: Checkout code
+        uses: actions/checkout@v5.0.0
+
+      # 2. Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      # 3. Cache npm dependencies
+      - name: Cache npm dependencies
+        uses: actions/cache@v4.2.4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      # 4. Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 5. Run ESLint and save results
+      - name: Run ESLint
+        run: |
+          npx eslint . --ext .js,.jsx,.ts,.tsx -f stylish > lint-report.txt || true
+
+      # 6. Upload ESLint results as artifact
+      - name: Upload Lint Report
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: lint-report
+          path: lint-report.txt
+
+      # 7. Run tests and generate JUnit report
+      - name: Run tests
+        run: |
+          mkdir -p test-results
+          npm test -- --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results/results.xml
+
+      # 8. Publish Test Results
+      - name: Publish Test Results
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: test-results
+          path: test-results/results.xml
+
+      # 9. Create build artifact for CD
+      - name: Create artifact for deployment
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: backend-app
+          path: |
+            .
+            !node_modules/
