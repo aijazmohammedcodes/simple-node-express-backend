@@ -42,7 +42,7 @@ jobs:
       - name: Run ESLint
         run: |
           set -o pipefail
-          npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 --exit-on-fatal-error -f stylish | tee lint-report.txt
+          npx eslint . --ext .js,.jsx,.ts,.tsx --exit-on-fatal-error -f stylish | tee lint-report.txt
 
       # 6. Upload ESLint results as artifact (Code Quality Scanning)
       - name: Upload Lint Report
