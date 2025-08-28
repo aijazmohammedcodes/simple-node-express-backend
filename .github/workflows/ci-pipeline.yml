@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 18
 
       # 3. Cache npm dependencies
       - name: Cache npm dependencies
@@ -100,13 +100,48 @@ jobs:
           name: gitleaks-report
           path: gitleaks-report.json
 
-      # 10. Run tests and generate JUnit report
+      # 10. Build Docker Image
+      - name: Build Docker Image
+        run: docker build -t my-node-app .
+
+      # 11. Lint Dockerfile
+      - name: Install Hadolint
+        run: curl -sSfL https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64 -o /usr/local/bin/hadolint && chmod +x /usr/local/bin/hadolint
+      - name: Lint Dockerfile
+        run: hadolint Dockerfile
+
+      # 12. Run tests inside Docker container
+      - name: Run tests inside Docker
+        run: docker run --rm my-node-app npm test
+
+      # 13. Scan Docker Image for Vulnerabilities
+      - name: Install Trivy
+        run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+
+      - name: Scan Docker Image
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
+
+      # 14. Push Docker Image to GitHub Container Registry
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tag Docker Image
+        run: docker tag my-node-app ghcr.io/${{ github.repository_owner }}/my-node-app:latest
+
+      - name: Push Docker Image
+        run: docker push ghcr.io/${{ github.repository_owner }}/my-node-app:latest
+
+      # 15. Run tests and generate JUnit report
       - name: Run tests
         run: |
           mkdir -p test-results
           npm test -- --reporter mocha-junit-reporter --reporter-options mochaFile=./test-results/results.xml
 
-      # 11. Publish Test Results
+      # 16. Publish Test Results
       - name: Publish Test Results
         if: always()
         uses: actions/upload-artifact@v4.6.2
@@ -114,7 +149,7 @@ jobs:
           name: test-results
           path: test-results/results.xml
 
-      # 12. Create build artifact for CD
+      # 17. Create build artifact for CD
       - name: Create artifact for deployment
         uses: actions/upload-artifact@v4.6.2
         with:
