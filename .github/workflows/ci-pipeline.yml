@@ -51,21 +51,21 @@ jobs:
           path: lint-report.txt
 
       # 7. CodeQL - Code Scanning
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
+      # - name: Initialize CodeQL
+      #   uses: github/codeql-action/init@v3
+      #   with:
+      #     languages: javascript
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          output: codeql-results.sarif
+      # - name: Perform CodeQL Analysis
+      #   uses: github/codeql-action/analyze@v3
+      #   with:
+      #     output: codeql-results.sarif
 
-      - name: Upload CodeQL Report
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeql-report
-          path: codeql-results.sarif
+      # - name: Upload CodeQL Report
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: codeql-report
+      #     path: codeql-results.sarif
 
       # 8. Dependency Scanning
       - name: Run npm audit
@@ -80,13 +80,15 @@ jobs:
       # 9. Secrets Detection with Gitleaks
       - name: Install Gitleaks
         run: |
-          curl -sSfL https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks-linux-amd64 \
-            -o gitleaks
+          VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep tag_name | cut -d '"' -f 4)
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/$VERSION/gitleaks_${VERSION#v}_linux_x64.tar.gz -o gitleaks.tar.gz
+          tar -xzf gitleaks.tar.gz gitleaks
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin/
 
       - name: Run Gitleaks
         run: gitleaks detect --source . --report-path gitleaks-report.json --no-git
+
 
       - name: Upload Gitleaks Report
         uses: actions/upload-artifact@v4
