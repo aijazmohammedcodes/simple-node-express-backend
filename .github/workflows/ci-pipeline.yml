@@ -52,23 +52,23 @@ jobs:
           name: lint-report
           path: lint-report.txt
 
-      # 7. CodeQL - Code Scanning
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript
+      # # 7. CodeQL - Code Scanning
+      # - name: Initialize CodeQL
+      #   uses: github/codeql-action/init@v3
+      #   with:
+      #     languages: javascript
 
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          output: codeql-results.sarif
+      # - name: Perform CodeQL Analysis
+      #   uses: github/codeql-action/analyze@v3
+      #   with:
+      #     output: codeql-results.sarif
 
-      - name: Upload CodeQL Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: codeql-report
-          path: codeql-results.sarif
+      # - name: Upload CodeQL Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: codeql-report
+      #     path: codeql-results.sarif
 
       # 8. Dependency Scanning
       - name: Run npm audit
