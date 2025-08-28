@@ -41,18 +41,15 @@ jobs:
       # 5. Run ESLint and save results (Code Quality Scanning)
       - name: Run ESLint
         run: |
-          npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 --exit-on-fatal-error -f stylish | tee lint-report.txt
-          if [ $? -ne 0 ]; then
-            exit 1
-          fi
+          npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 --exit-on-fatal-error
 
-      # 6. Upload ESLint results as artifact (Code Quality Scanning)
-      - name: Upload Lint Report
-        if: always()
-        uses: actions/upload-artifact@v4.6.2
-        with:
-          name: lint-report
-          path: lint-report.txt
+      # # 6. Upload ESLint results as artifact (Code Quality Scanning)
+      # - name: Upload Lint Report
+      #   if: always()
+      #   uses: actions/upload-artifact@v4.6.2
+      #   with:
+      #     name: lint-report
+      #     path: lint-report.txt
 
       # 7. CodeQL - Code Scanning
       - name: Initialize CodeQL
