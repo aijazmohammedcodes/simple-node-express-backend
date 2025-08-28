@@ -115,8 +115,11 @@ jobs:
         run: docker run --rm my-node-app npm test
 
       # 13. Scan Docker Image for Vulnerabilities
+      # Install Trivy
       - name: Install Trivy
-        run: curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
+
 
       - name: Scan Docker Image
         run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
