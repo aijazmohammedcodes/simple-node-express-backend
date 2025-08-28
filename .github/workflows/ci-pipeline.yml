@@ -64,6 +64,7 @@ jobs:
           output: codeql-results.sarif
 
       - name: Upload CodeQL Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: codeql-report
@@ -71,9 +72,10 @@ jobs:
 
       # 8. Dependency Scanning
       - name: Run npm audit
-        run: npm audit --json > npm-audit-report.json
+        run: npm audit --audit-level=high --json > npm-audit-report.json
 
       - name: Upload npm Audit Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: npm-audit-report
@@ -89,10 +91,11 @@ jobs:
           sudo mv gitleaks /usr/local/bin/
 
       - name: Run Gitleaks
-        run: gitleaks detect --source . --report-path gitleaks-report.json --no-git
+        run: gitleaks detect --source . --report-format json --report-path gitleaks-report.json --no-git --verbose --exit-code 1
 
 
       - name: Upload Gitleaks Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gitleaks-report
