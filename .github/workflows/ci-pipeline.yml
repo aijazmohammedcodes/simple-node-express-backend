@@ -121,8 +121,8 @@ jobs:
           sudo mv ./bin/trivy /usr/local/bin/
           trivy --version
           
-      # - name: Scan Docker Image
-      #   run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
+      - name: Scan Docker Image
+        run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
 
       # Log in to Docker Hub
       - name: Log in to Docker Hub
