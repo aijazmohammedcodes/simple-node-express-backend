@@ -41,7 +41,7 @@ jobs:
       # 5. Run ESLint and save results (Code Quality Scanning)
       - name: Run ESLint
         run: |
-          npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 -f stylish | tee lint-report.txt
+          npx eslint . --ext .js,.jsx,.ts,.tsx --max-warnings=0 --exit-on-fatal-error -f stylish | tee lint-report.txt
 
       # 6. Upload ESLint results as artifact (Code Quality Scanning)
       - name: Upload Lint Report
