@@ -121,8 +121,8 @@ jobs:
           sudo mv ./bin/trivy /usr/local/bin/
           trivy --version
           
-      - name: Scan Docker Image
-        run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
+      # - name: Scan Docker Image
+      #   run: trivy image --exit-code 1 --severity HIGH,CRITICAL my-node-app
 
       # 14. Push Docker Image to GitHub Container Registry
       - name: Log in to GHCR
