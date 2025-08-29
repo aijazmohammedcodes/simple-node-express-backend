@@ -129,7 +129,9 @@ jobs:
         run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       - name: Tag Docker Image
-        run: docker tag my-node-app ${{ secrets.DOCKER_HUB_USERNAME }}/my-node-app:dev-latest ${{ secrets.DOCKER_HUB_USERNAME }}/my-node-app:dev-${{ github.sha }}
+        run: |
+          docker tag my-node-app ${{ secrets.DOCKER_HUB_USERNAME }}/my-node-app:dev-latest
+          docker tag my-node-app ${{ secrets.DOCKER_HUB_USERNAME }}/my-node-app:dev-${{ github.sha }}
 
       - name: Push Docker Image
         run: |
