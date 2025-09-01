@@ -160,3 +160,13 @@ jobs:
           path: |
             .
             !node_modules/
+            
+  deploy-dev:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Render (Dev)
+        run: |
+          curl -X POST "https://api.render.com/v1/services/srv-d2oo2eogjchc73f0gjtg/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Accept: application/json"
